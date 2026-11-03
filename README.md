@@ -77,12 +77,12 @@ DACC_LTDD_GODDY/
 
 ## 4. Hướng Dẫn Chạy Dự Án
 
-### 4.1. Khởi chạy WebAPI với Conveyor by Keyoti (Visual Studio)
-1. Mở file `Goddy_Game_WebAPI.sln` bằng **Visual Studio 2022**.
-2. Nhấn nút **Run (F5)**. Cửa sổ extension **Conveyor by Keyoti** sẽ hiện lên.
-3. Bấm **"Access Over Internet"** để lấy link miễn phí `https://xxxx.conveyor.cloud`.
+### 4.1. Khởi chạy WebAPI Kết Nối Online Toàn Cầu
+1. Mở file `Goddy_Game_WebAPI.sln` bằng **Visual Studio 2022** và nhấn **F5**.
+2. Chạy file `Chay_Online_API.bat` (hoặc Conveyor `Access Over Internet`) để mở đường hầm Cloud Tunnel ra toàn cầu.
+3. Link API Online công khai: `https://oven-eggs-millennium-start.trycloudflare.com/api/` (Swagger: `https://oven-eggs-millennium-start.trycloudflare.com`).
 
-### 4.2. Chạy Ứng Dụng Di Động
-1. Cài đặt file `Goddy_Gaming_App_Release.apk` lên điện thoại Android hoặc BlueStacks.
-2. Mở app, tại màn hình Đăng Nhập bấm nút cấu hình Host (icon DNS) ở góc trên để dán link Conveyor.
-3. Bấm **"Đăng Nhập Nhanh Tân Thủ"** để vào trải nghiệm ngay lập tức.
+### 4.2. Chạy Ứng Dụng Di Động (Đã Tích Hợp Sẵn Link Online)
+1. Cài đặt file `Goddy_Gaming_App_Release.apk` lên điện thoại Android hoặc BlueStacks (máy bất kỳ, dùng 4G hoặc Wi-Fi khác nhau).
+2. Ứng dụng đã tự động kết nối sẵn tới WebAPI Cloud. Hoặc tại màn hình Đăng Nhập bấm nút 🌐 ở góc trên để đổi địa chỉ API tùy ý.
+3. Bấm **"Đăng Nhập Nhanh Tân Thủ"** hoặc đăng ký tài khoản để chơi đối kháng 1v1 liên mạng thời gian thực.

@@ -50,10 +50,10 @@ class ApiConfig {
       return 'http://localhost:5271/api/';
     }
     if (Platform.isAndroid) {
-      // Default to Conveyor Remote URL
-      return 'http://192.168.50.80:45455/api/';
+      // Default to Public Online Tunnel URL for cross-network (4G, different Wi-Fi) multiplayer
+      return 'https://oven-eggs-millennium-start.trycloudflare.com/api/';
     }
-    return 'http://localhost:5271/api/';
+    return 'https://oven-eggs-millennium-start.trycloudflare.com/api/';
   }
 
   static List<String> get candidateHosts {
@@ -62,6 +62,7 @@ class ApiConfig {
       list.add(_customBaseUrl!);
     }
     list.addAll(const [
+      'https://oven-eggs-millennium-start.trycloudflare.com/api/',
       'http://192.168.50.80:45455/api/',
       'http://192.168.50.80:5271/api/',
       'https://192.168.50.80:45455/api/',
