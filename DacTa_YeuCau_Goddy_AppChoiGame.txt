@@ -1,0 +1,100 @@
+================================================================================
+TÀI LIỆU ĐẶC TẢ YÊU CẦU KỸ THUẬT VÀ THIẾT KẾ PHẦN MỀM (SRS)
+ĐỒ ÁN CUỐI KỲ: CỔNG GAME TRÍ TUỆ ĐỐI KHÁNG ĐA NỀN TẢNG "GODDY GAMING HUB"
+================================================================================
+Môn học: Lập trình thiết bị di động (Mobile Application Development)
+Sinh viên thực hiện: Huỳnh Nguyễn Vĩnh Phúc
+Mã số sinh viên (MSSV): 2380614923
+Lớp học phần: Lập trình thiết bị di động - Tuần 7 (Final Project)
+Mobile Frontend: Flutter SDK 3.x (Dart Language)
+Backend WebAPI: ASP.NET Core Web API (.NET 9) - Goddy_Game_WebAPI
+Cơ sở dữ liệu: Entity Framework Core In-Memory Database / State Storage
+Công cụ kết nối mạng: Conveyor by Keyoti (Free), Microsoft Dev Tunnels, Ngrok
+File cài đặt APK: Goddy_Gaming_App_Release.apk (~52.4MB tại thư mục gốc)
+Solution Visual Studio: Goddy_Game_WebAPI.sln (Port 5271 & Conveyor 45455)
+================================================================================
+
+1. GIỚI THIỆU TỔNG QUAN & TÍNH ĐỘT PHÁ CỦA ĐỀ TÀI:
+- Bối cảnh & Mục tiêu:
+  Khắc phục nhược điểm của các tựa game giải đố rời rạc trên thị trường hiện nay. Xây dựng "Goddy Gaming Hub" thành một hệ sinh thái cổng game trí tuệ All-in-One: một tài khoản duy nhất (SSO) chơi được tất cả các game, lưu tiến độ, cấp bậc Rank, điểm EXP và thành tích thi đấu.
+- Điểm đột phá về công nghệ & luật chơi:
+  + Rubik 3D AI Speedcube: Khối Rubik 3D 360 độ tương tác chuẩn WCA. Ban đầu ở trạng thái gốc thuần 1 màu ở 6 mặt -> Nút "Xáo Trộn" -> Nút "Bắt Đầu Tính Giờ" -> Bảng nút xoay chuẩn thực tế (Ngang Trái/Phải, Dọc Trái/Phải, Xoay Thuận/Nghịch) -> Tự động nhận diện chiến thắng -> Nút "Bắt Đầu Lại".
+  + Quantum Caro: Cờ Caro chiến thuật đấu AI Minimax Alpha-Beta 3 cấp độ kết hợp Thẻ Kỹ Năng Lượng Tử độc quyền (Quantum Swap, EMP Freeze) và đồng hồ suy nghĩ 15s.
+  + Sudoku Hologram Spectrum: Quang phổ xung đột thời gian thực và AI suy luận logic giải thích lý do điền số (Naked Single).
+  + Gyro Tilt Slide Puzzle: Tận dụng cảm biến gia tốc phần cứng di động (sensors_plus) để nghiêng điện thoại trượt gạch theo quán tính vật lý thực tế + bộ giải A* Manhattan.
+  + Thách Đấu Đối Kháng 1v1: Kiểm tra sẵn sàng nghiêm ngặt (Ready Check - cả 2 cùng bấm Sẵn Sàng thì trận đấu mới bắt đầu, điểm số xuất phát chuẩn 0 điểm, chung hạt giống đề bài).
+  + Kết nối WebAPI đa mạng: Hỗ trợ Conveyor by Keyoti (Free), Dev Tunnels, Ngrok kết nối qua 4G hoặc khác mạng Wi-Fi.
+
+================================================================================
+2. KIẾN TRÚC HỆ THỐNG (3-TIER ARCHITECTURE):
+- Tầng Trình Diễn (Mobile Presentation Tier): Flutter SDK (Dart), Dark Cyberpunk UI, 3D Canvas, Sensors Physics, Provider State Management.
+- Tầng Mạng & Tunnel (Networking & Tunneling Tier): RESTful JSON API qua HTTP/HTTPS, Conveyor by Keyoti (conveyor.cloud), Dev Tunnels.
+- Tầng Nghiệp Vụ & Dữ Liệu (Backend & Database Tier): ASP.NET Core Web API (.NET 9), Entity Framework Core In-Memory, SharedPreferences Local Persistence.
+
+================================================================================
+3. MÔ HÌNH DỮ LIỆU CHÍNH (DATA MODELS):
+- UserAccount: Id, Username, Email, PasswordHash, Avatar, RankTitle, TotalExp, Wins, TotalMatches.
+- GameResult: Id, UserId, GameType (rubik, caro, sudoku, slide_puzzle), Mode (solo, duel), Score, ElapsedSeconds, Mistakes, Seed, CompletedAt.
+- ChallengeRoom: RoomId, PinCode, GameType, Seed, HostUserId, GuestUserId, HostReady, GuestReady, HostScore (khởi tạo = 0), GuestScore (khởi tạo = 0), Status.
+- FriendModel: Id, Username, Avatar, Status, WinRate, IsOnline.
+- ChatMessage: Id, SenderName, SenderAvatar, Message, Timestamp, IsQuickSticker.
+
+================================================================================
+4. ĐẶC TẢ YÊU CẦU CHỨC NĂNG (FUNCTIONAL REQUIREMENTS):
+- FR-01: Quản trị Người dùng & SSO:
+  + Đăng ký với Gamer Tag, Email, Mật khẩu, Chọn Avatar Cyberpunk đặc sắc.
+  + Đăng nhập bảo mật & Lưu phiên (Session persistence) bằng SharedPreferences.
+  + Đăng nhập nhanh Demo 1-Chạm ("Đăng Nhập Nhanh Tân Thủ") phục vụ chấm thi.
+  + Hộp thoại cấu hình WebAPI Host (Hỗ trợ Conveyor Cloud, LAN :45455, Localhost :5271, Emulator 10.0.2.2, Dev Tunnels).
+  + Quản lý hồ sơ, cấp bậc Rank (Đồng -> Bạc -> Vàng -> Bạch Kim -> Kim Cương -> Cao Thủ -> Huyền Thoại Goddy).
+- FR-02: Bộ 4 Game Trí Tuệ Thế Hệ Mới:
+  + Game 1 (Rubik 3D AI Speedcube): Base 6 mặt thuần 1 màu -> "1. Xáo Trộn" -> "2. Bắt Đầu Tính Giờ" -> Bảng điều khiển xoay thực tế (Ngang trên/dưới, Dọc trái/phải, Mặt trước thuận/nghịch) -> Tự động phát hiện chiến thắng -> Nút "Bắt Đầu Lại".
+  + Game 2 (Quantum Caro): Bàn cờ 12x12, đấu AI Minimax, thẻ kỹ năng Quantum Swap & EMP Freeze, đếm ngược 15s mỗi lượt.
+  + Game 3 (Sudoku Hologram Spectrum): 4 cấp độ, quang phổ màu phát hiện xung đột tức thì, AI giải thích Naked Single, 3 mạng.
+  + Game 4 (Gyro Tilt Slide Puzzle): Cảm biến gia tốc di động nghiêng máy trượt gạch + D-Pad ảo + gợi ý A* Manhattan.
+- FR-03: Chọn Chế Độ Chơi: Menu tuyển chọn 1P Solo (Chơi đơn), 2P Duel (Thách đấu đối kháng) và Xem Bảng Xếp Hạng.
+- FR-04: Thách Đấu Đối Kháng 1v1 & Ready Check:
+  + Mời bạn bè từ danh sách bạn bè trực tuyến hoặc qua mã PIN phòng đấu.
+  + Kiểm tra sẵn sàng nghiêm ngặt: Cả 2 người chơi (Host & Guest) phải CÙNG BẤM "SẴN SÀNG" thì trận đấu mới bắt đầu.
+  + Điểm khởi đầu: Khi bắt đầu trận đấu, điểm số của cả hai người chơi bắt buộc xuất phát từ 0 điểm.
+  + Cùng hạt giống đề bài (Seed) đảm bảo công bằng tuyệt đối.
+- FR-05: Bảng Xếp Hạng Podium & Cấp Bậc Rank:
+  + Bục vinh danh Top 3 (Vàng, Bạc, Đồng) cho 5 bảng xếp hạng.
+  + Công thức tính điểm Rank: Score = max(0, [Base - (Time x 2) - (Mistakes x 60)] x Hệ số độ khó).
+- FR-06: Sảnh Chat Thế Giới & Quick Stickers: Giao lưu, rủ solo và gửi nhãn dán sticker nhanh.
+
+================================================================================
+5. ĐẶC TẢ YÊU CẦU PHI CHỨC NĂNG (NON-FUNCTIONAL REQUIREMENTS):
+- Hiệu năng: Biên dịch AOT Release 60 FPS, phản hồi cảm biến và xoay 3D tức thì.
+- Dung lượng: Tối ưu Tree-shaking, file APK Release chỉ ~52.4MB (giảm 70% so với debug 180MB).
+- Giao diện: Chống tràn màn hình (Overflow-Free) 100% trên mọi kích thước màn hình điện thoại di động.
+- Mạng: Tương thích hoàn toàn Conveyor by Keyoti (Free), Dev Tunnels, Ngrok chạy được qua 4G và khác Wi-Fi.
+
+================================================================================
+6. DANH MỤC RESTful WEB API:
+- POST /api/auth/register : Đăng ký tài khoản game thủ mới.
+- POST /api/auth/login : Đăng nhập, cấp phát JWT Token.
+- POST /api/auth/guest : Đăng nhập nhanh khách / demo 1-chạm.
+- GET  /api/profile : Lấy thông tin cá nhân, cấp rank, EXP.
+- PUT  /api/profile : Cập nhật avatar, tên hiển thị.
+- GET  /api/leaderboard?gameType={type} : Lấy bảng xếp hạng theo game.
+- POST /api/leaderboard/submit : Gửi điểm kỷ lục lên hệ thống.
+- POST /api/challenge/create : Tạo phòng đấu đối kháng.
+- POST /api/challenge/join : Vào phòng đấu bằng mã PIN.
+- POST /api/challenge/ready : Chuyển trạng thái Sẵn Sàng (Ready Check).
+- POST /api/challenge/start : Bắt đầu trận đấu (cần cả 2 ready, điểm về 0).
+- GET  /api/challenge/friends : Lấy danh sách bạn bè trực tuyến.
+- GET  /api/chat/messages : Tải tin nhắn sảnh thế giới.
+- POST /api/chat/send : Gửi tin nhắn / quick sticker.
+
+================================================================================
+7. KẾT QUẢ KIỂM THỬ:
+- flutter analyze: 0 issues found (Không có bất kỳ lỗi cú pháp hoặc cảnh báo nào).
+- flutter test: 8/8 tests passed (100% đạt các ca kiểm thử tự động).
+- Kiểm thử thực tế: Khối Rubik 3D, Ready Check, Start 0 pts, Caro Minimax, Sudoku, Gyro Tilt đều hoạt động chính xác.
+
+================================================================================
+8. HƯỚNG DẪN TRIỂN KHAI:
+- Chạy WebAPI: Mở file "Goddy_Game_WebAPI.sln" bằng Visual Studio 2022 -> Bấm F5 -> Nhấn "Access Over Internet" trên cửa sổ Conveyor by Keyoti để lấy link free.
+- Chạy Mobile App: Cài đặt file "Goddy_Gaming_App_Release.apk" trên điện thoại Android -> Nhập link Conveyor ở biểu tượng quả địa cầu màn hình Đăng Nhập -> Bấm "Đăng Nhập Nhanh Tân Thủ".
+================================================================================

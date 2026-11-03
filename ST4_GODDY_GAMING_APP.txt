@@ -1,0 +1,36 @@
+- 4 Trò Chơi: Rubik, Caro, Sudoku, Gyro Tilt Slide Puzzle (Xếp hình)
+
+Mô tả nhanh: 
+Rubik 3D:
+- Mô phỏng không gian 3 chiều 360 độ (Isometric 3D Projection).
+- Khối 6 mặt
+- Xáo trộn ngẫu nhiên
+- Bộ phím xoay
+
+Caro:
+- Bàn cờ ma trận 10x10.
+- Giới hạn thời gian 15s/lượt
+
+Sudoku:
+- Ma trận 9x9
+- Hệ thống 3 mạng chơi và tính điểm chuỗi liên tiếp (đúng liên tục không mất mạng thì sẽ được thêm điểm)
+- Bảng nhập số cảm ứng 1-9 và công cụ xóa ô.
+
+Gyro Tilt Slide Puzzle (Xếp Hình)
+- Điều khiển kép: Nghiêng điện thoại bằng cảm biến gia tốc (đang trong giai đoạn phát triển)(phát triển sớm)
+- Tùy chọn kích thước ma trận 3x3 và 4x4.
+
+ 
+- Hệ thống Thách Đấu Đối Kháng 1v1
+	+ Tạo phòng thi đấu và sinh mã PIN ngẫu nhiên.
+	+ Cơ chế kiểm tra sẵn sàng (Ready Check: Cả 2 cùng bấm Sẵn Sàng mới mở ván).
+	+ Đồng bộ hạt giống đề bài (Seed chung) cho cả 2 bên.
+	+ Đánh cờ Caro 1v1 theo lượt qua mạng LAN/Cloud.
+	+ Đua tốc độ Sudoku, Rubik, Slide Puzzle thời gian thực: Bên về đích trước tự động dừng đồng hồ đối thủ.
+	+ Tự động tạo seed mơi cho bàn chơi mới
+- Bảng Xếp Hạng & Danh Hiệu
+
+- Backend WebAPI và CSDL:
+	+ Máy chủ ASP.NET Core Web API trên nền .NET 9.
+	+ Cơ sở dữ liệu SQLite (goddy.db) quản lý qua Entity Framework Core.
+	+ Lưu trữ 5 : Users, Scores, DuelRooms, ChatMessages, GameProgresses
