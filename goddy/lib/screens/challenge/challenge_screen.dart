@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
 import '../../config/api_config.dart';
@@ -342,10 +343,10 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Cyberpunk Viewfinder Frame
+              // Real Camera Scanner / Cyberpunk Viewfinder Frame
               Container(
-                width: 220,
-                height: 170,
+                width: 260,
+                height: 220,
                 decoration: BoxDecoration(
                   color: Colors.black45,
                   borderRadius: BorderRadius.circular(16),
@@ -354,39 +355,68 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                     BoxShadow(color: GoddyTheme.neonCyan.withValues(alpha: 0.25), blurRadius: 15),
                   ],
                 ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const Icon(Icons.qr_code_2, size: 90, color: Colors.white24),
-                    // Animated scanning beam
-                    Positioned(
-                      top: 45,
-                      left: 12,
-                      right: 12,
-                      child: Container(
-                        height: 2.5,
-                        decoration: BoxDecoration(
-                          boxShadow: const [BoxShadow(color: GoddyTheme.neonCyan, blurRadius: 8)],
-                          color: GoddyTheme.neonCyan,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      MobileScanner(
+                        onDetect: (capture) {
+                          final barcodes = capture.barcodes;
+                          for (final barcode in barcodes) {
+                            final raw = barcode.rawValue;
+                            if (raw != null && raw.isNotEmpty) {
+                              String code = raw.trim().toUpperCase();
+                              if (code.contains(':')) {
+                                code = code.split(':').last;
+                              }
+                              if (code.length >= 4 && code.length <= 10) {
+                                Navigator.pop(ctx);
+                                _pinController.text = code;
+                                _handleJoinRoom(code);
+                                break;
+                              }
+                            }
+                          }
+                        },
+                        errorBuilder: (context, error) {
+                          return Container(
+                            color: Colors.black87,
+                            padding: const EdgeInsets.all(12),
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.videocam_off, size: 40, color: Colors.white38),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Không mở được camera (trên máy ảo)\nVui lòng dùng nút dán mã PIN bên dưới',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.white70, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      Positioned(
+                        top: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: GoddyTheme.neonCyan.withValues(alpha: 0.5)),
+                          ),
+                          child: const Text(
+                            '📷 CAMERA TRỰC TIẾP • ĐANG QUÉT MÃ QR',
+                            style: TextStyle(color: GoddyTheme.neonCyan, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: GoddyTheme.bgDark.withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: GoddyTheme.neonCyan.withValues(alpha: 0.4)),
-                        ),
-                        child: const Text(
-                          'SCANNER READY • ĐANG QUÉT',
-                          style: TextStyle(color: GoddyTheme.neonCyan, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 

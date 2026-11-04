@@ -138,6 +138,30 @@ class ProfileScreen extends StatelessWidget {
                     style: const TextStyle(color: GoddyTheme.textMuted, fontSize: 12),
                   ),
                   const SizedBox(height: 12),
+                  if (user.email == 'admin@goddy.io' || user.username.contains('Admin')) ...[
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFFFFD166), Color(0xFFFF9F1C)]),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(color: const Color(0xFFFFD166).withValues(alpha: 0.4), blurRadius: 10),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified_user, size: 16, color: Colors.black),
+                          SizedBox(width: 6),
+                          Text(
+                            '👑 QUẢN TRỊ VIÊN HỆ THỐNG (SYSTEM ADMIN)',
+                            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(

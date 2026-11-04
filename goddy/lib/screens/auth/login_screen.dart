@@ -159,6 +159,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _handleAdminQuickLogin() {
+    _emailController.text = 'admin@goddy.io';
+    _passwordController.text = '123456';
+    _handleLogin();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -309,6 +315,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                     onPressed: _isLoading ? null : _handleQuickDemoLogin,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Quick Admin Login Button (Directly logs into admin@goddy.io)
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFFFD166), width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.admin_panel_settings_rounded, color: Color(0xFFFFD166)),
+                    label: const Text(
+                      '👑 Đăng Nhập Tài Khoản Admin (GoddyAdmin)',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                    onPressed: _isLoading ? null : _handleAdminQuickLogin,
                   ),
                 ),
 
