@@ -19,6 +19,31 @@ namespace Goddy_Game_WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetLeaderboard([FromQuery] string? gameType)
         {
+            if (string.IsNullOrEmpty(gameType))
+            {
+                // Tab Tong Hop: Xep hang theo tong EXP va thanh tich cua toan bo nguoi dung thuc te
+                var users = await _context.Users
+                    .OrderByDescending(u => u.Exp)
+                    .Take(25)
+                    .ToListAsync();
+
+                if (users.Any())
+                {
+                    var rankedUsers = users.Select((u, index) => new
+                    {
+                        Rank = index + 1,
+                        UserId = u.Id,
+                        Username = u.Username,
+                        Avatar = u.Avatar,
+                        Score = u.Exp,
+                        TimeSeconds = 0,
+                        Mistakes = 0,
+                        GameType = (string?)null
+                    });
+                    return Ok(rankedUsers);
+                }
+            }
+
             var query = _context.Scores.AsQueryable();
             if (!string.IsNullOrEmpty(gameType))
             {
@@ -27,7 +52,7 @@ namespace Goddy_Game_WebAPI.Controllers
 
             var entries = await query
                 .OrderByDescending(s => s.Score)
-                .Take(20)
+                .Take(25)
                 .ToListAsync();
 
             var ranked = entries.Select((s, index) => new

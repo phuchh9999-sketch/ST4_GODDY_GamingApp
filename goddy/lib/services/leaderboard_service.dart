@@ -12,8 +12,45 @@ class LeaderboardService extends ChangeNotifier {
   final List<GameResult> _history = [];
   List<GameResult> get history => List.unmodifiable(_history);
 
+  final Map<String, List<LeaderboardEntry>> _remoteEntries = {};
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   LeaderboardService() {
     _loadHistory();
+    fetchRemoteLeaderboard();
+  }
+
+  Future<void> fetchRemoteLeaderboard() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // 1. Fetch Tong Hop (Global theo EXP / tat ca diem nguoi dung)
+      final resGlobal = await ApiClient().get('leaderboard');
+      if (resGlobal != null && resGlobal.statusCode == 200) {
+        final list = jsonDecode(utf8.decode(resGlobal.bodyBytes)) as List<dynamic>;
+        _remoteEntries['global'] = list
+            .map((e) => LeaderboardEntry.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      // 2. Fetch theo tung tro choi thuc te
+      for (final gt in GameType.values) {
+        final res = await ApiClient().get('leaderboard?gameType=${gt.id}');
+        if (res != null && res.statusCode == 200) {
+          final list = jsonDecode(utf8.decode(res.bodyBytes)) as List<dynamic>;
+          _remoteEntries[gt.id] = list
+              .map((e) => LeaderboardEntry.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching remote leaderboard: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _loadHistory() async {
@@ -91,63 +128,58 @@ class LeaderboardService extends ChangeNotifier {
     }
   }
 
-  // Pre-configured rival players with dynamic user integration
+  // Lay bang xep hang thuc te tu CSDL WebAPI & SQLite
   List<LeaderboardEntry> getLeaderboardFor(GameType? gameType, {LeaderboardEntry? currentUserEntry}) {
     List<LeaderboardEntry> entries = [];
+    final key = gameType?.id ?? 'global';
 
-    if (gameType == null) {
-      // Global Leaderboard
-      entries = [
-        const LeaderboardEntry(rank: 1, userId: 'rival_1', username: 'ViperCyber', avatar: '⚡', score: 18450, rankTier: RankTier.grandmaster),
-        const LeaderboardEntry(rank: 2, userId: 'rival_2', username: 'MatrixPhantom', avatar: '🥷', score: 14200, rankTier: RankTier.master),
-        const LeaderboardEntry(rank: 3, userId: 'rival_3', username: 'NeonQueen', avatar: '👑', score: 11800, rankTier: RankTier.master),
-        const LeaderboardEntry(rank: 4, userId: 'rival_4', username: 'QuantumGhost', avatar: '👻', score: 9200, rankTier: RankTier.diamond),
-        const LeaderboardEntry(rank: 5, userId: 'rival_5', username: 'GoddyRacer', avatar: '🏎️', score: 7400, rankTier: RankTier.diamond),
-        const LeaderboardEntry(rank: 6, userId: 'rival_6', username: 'PixelMaster', avatar: '🎯', score: 5800, rankTier: RankTier.platinum),
-        const LeaderboardEntry(rank: 7, userId: 'rival_7', username: 'ZeroGravity', avatar: '🚀', score: 4100, rankTier: RankTier.gold),
-      ];
+    // 1. Uu tien tuyet doi lay du lieu nguoi choi thuc te tu CSDL
+    if (_remoteEntries.containsKey(key) && _remoteEntries[key]!.isNotEmpty) {
+      entries = List<LeaderboardEntry>.from(_remoteEntries[key]!);
     } else {
-      switch (gameType) {
-        case GameType.rubik:
-          entries = [
-            const LeaderboardEntry(rank: 1, userId: 'rival_r1', username: 'SpeedCuber_VN', avatar: '🧩', score: 2450, timeSeconds: 19, mistakes: 0, gameType: GameType.rubik),
-            const LeaderboardEntry(rank: 2, userId: 'rival_r2', username: 'RubikGod', avatar: '🔥', score: 2180, timeSeconds: 27, mistakes: 1, gameType: GameType.rubik),
-            const LeaderboardEntry(rank: 3, userId: 'rival_r3', username: 'NeonTurner', avatar: '⚡', score: 1950, timeSeconds: 38, mistakes: 2, gameType: GameType.rubik),
-            const LeaderboardEntry(rank: 4, userId: 'rival_r4', username: 'CubeHero', avatar: '🤖', score: 1720, timeSeconds: 46, mistakes: 1, gameType: GameType.rubik),
-            const LeaderboardEntry(rank: 5, userId: 'rival_r5', username: 'TwistMaster', avatar: '🌀', score: 1450, timeSeconds: 58, mistakes: 3, gameType: GameType.rubik),
-          ];
-          break;
-        case GameType.caro:
-          entries = [
-            const LeaderboardEntry(rank: 1, userId: 'rival_c1', username: 'GrandmasterCaro', avatar: '🧠', score: 3200, timeSeconds: 140, mistakes: 1, gameType: GameType.caro),
-            const LeaderboardEntry(rank: 2, userId: 'rival_c2', username: 'TacticalAI_Destroyer', avatar: '⚔️', score: 2890, timeSeconds: 175, mistakes: 2, gameType: GameType.caro),
-            const LeaderboardEntry(rank: 3, userId: 'rival_c3', username: 'CaroNinja', avatar: '🥷', score: 2400, timeSeconds: 210, mistakes: 4, gameType: GameType.caro),
-            const LeaderboardEntry(rank: 4, userId: 'rival_c4', username: 'FiveInRow', avatar: '⭕', score: 2050, timeSeconds: 240, mistakes: 3, gameType: GameType.caro),
-          ];
-          break;
-        case GameType.sudoku:
-          entries = [
-            const LeaderboardEntry(rank: 1, userId: 'rival_s1', username: 'HologramBrain', avatar: '🔮', score: 2950, timeSeconds: 98, mistakes: 0, gameType: GameType.sudoku),
-            const LeaderboardEntry(rank: 2, userId: 'rival_s2', username: 'MatrixSudoku', avatar: '🔢', score: 2600, timeSeconds: 135, mistakes: 1, gameType: GameType.sudoku),
-            const LeaderboardEntry(rank: 3, userId: 'rival_s3', username: 'LogicSolver', avatar: '💡', score: 2210, timeSeconds: 180, mistakes: 1, gameType: GameType.sudoku),
-            const LeaderboardEntry(rank: 4, userId: 'rival_s4', username: 'FastMath99', avatar: '📐', score: 1800, timeSeconds: 240, mistakes: 2, gameType: GameType.sudoku),
-          ];
-          break;
-        case GameType.slidePuzzle:
-          entries = [
-            const LeaderboardEntry(rank: 1, userId: 'rival_p1', username: 'GyroSensoryKing', avatar: '📱', score: 2800, timeSeconds: 24, mistakes: 0, gameType: GameType.slidePuzzle),
-            const LeaderboardEntry(rank: 2, userId: 'rival_p2', username: 'TiltSlidePro', avatar: '🎮', score: 2410, timeSeconds: 36, mistakes: 2, gameType: GameType.slidePuzzle),
-            const LeaderboardEntry(rank: 3, userId: 'rival_p3', username: 'A_Star_Challenger', avatar: '🚀', score: 2100, timeSeconds: 48, mistakes: 3, gameType: GameType.slidePuzzle),
-            const LeaderboardEntry(rank: 4, userId: 'rival_p4', username: 'PuzzleQueen', avatar: '✨', score: 1750, timeSeconds: 65, mistakes: 4, gameType: GameType.slidePuzzle),
-          ];
-          break;
+      // Du lieu du phong neu chua ket noi mang
+      if (gameType == null) {
+        entries = [
+          const LeaderboardEntry(rank: 1, userId: 'rival_1', username: 'ViperCyber', avatar: '⚡', score: 18450, rankTier: RankTier.grandmaster),
+          const LeaderboardEntry(rank: 2, userId: 'rival_2', username: 'MatrixPhantom', avatar: '🥷', score: 14200, rankTier: RankTier.master),
+          const LeaderboardEntry(rank: 3, userId: 'rival_3', username: 'NeonQueen', avatar: '👑', score: 11800, rankTier: RankTier.master),
+        ];
+      } else {
+        switch (gameType) {
+          case GameType.rubik:
+            entries = [
+              const LeaderboardEntry(rank: 1, userId: 'rival_r1', username: 'SpeedCuber_VN', avatar: '🧩', score: 2450, timeSeconds: 19, mistakes: 0, gameType: GameType.rubik),
+              const LeaderboardEntry(rank: 2, userId: 'rival_r2', username: 'RubikGod', avatar: '🔥', score: 2180, timeSeconds: 27, mistakes: 1, gameType: GameType.rubik),
+            ];
+            break;
+          case GameType.caro:
+            entries = [
+              const LeaderboardEntry(rank: 1, userId: 'rival_c1', username: 'GrandmasterCaro', avatar: '🧠', score: 3200, timeSeconds: 140, mistakes: 1, gameType: GameType.caro),
+            ];
+            break;
+          case GameType.sudoku:
+            entries = [
+              const LeaderboardEntry(rank: 1, userId: 'rival_s1', username: 'HologramBrain', avatar: '🔮', score: 2950, timeSeconds: 98, mistakes: 0, gameType: GameType.sudoku),
+            ];
+            break;
+          case GameType.slidePuzzle:
+            entries = [
+              const LeaderboardEntry(rank: 1, userId: 'rival_p1', username: 'GyroSensoryKing', avatar: '📱', score: 2800, timeSeconds: 24, mistakes: 0, gameType: GameType.slidePuzzle),
+            ];
+            break;
+        }
       }
     }
 
     if (currentUserEntry != null) {
-      entries.add(currentUserEntry);
+      final exists = entries.any((e) => 
+          (e.userId.isNotEmpty && e.userId == currentUserEntry.userId) || 
+          e.username.toLowerCase() == currentUserEntry.username.replaceAll(' (Bạn)', '').toLowerCase());
+      
+      if (!exists) {
+        entries.add(currentUserEntry);
+      }
       entries.sort((a, b) => b.score.compareTo(a.score));
-      // Re-assign ranks
       for (int i = 0; i < entries.length; i++) {
         entries[i] = LeaderboardEntry(
           rank: i + 1,

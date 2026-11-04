@@ -21,6 +21,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LeaderboardService>().fetchRemoteLeaderboard();
+    });
   }
 
   @override
@@ -38,6 +41,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
           'BẢNG XẾP HẠNG HUYỀN THOẠI',
           style: GoogleFonts.orbitron(fontWeight: FontWeight.bold, fontSize: 16),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Cập nhật bảng xếp hạng',
+            icon: const Icon(Icons.refresh, color: GoddyTheme.neonCyan),
+            onPressed: () => context.read<LeaderboardService>().fetchRemoteLeaderboard(),
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
