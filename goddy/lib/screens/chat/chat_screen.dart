@@ -77,6 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final chat = context.watch<ChatService>();
     final auth = context.watch<AuthService>();
     final myId = auth.currentUser?.id;
+    final myUsername = auth.currentUser?.username;
     final messages = chat.messages;
 
     if (messages.length != _prevMessageCount) {
@@ -112,12 +113,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final msg = messages[index];
-                  final isMe = msg.senderId == myId;
+                  // Kiem tra chinh xac la tin nhan cua minh hay doi phuong
+                  final isMe = (myId != null && myId.isNotEmpty && msg.senderId == myId) ||
+                      (myUsername != null &&
+                          myUsername.isNotEmpty &&
+                          msg.senderName.trim().toLowerCase() == myUsername.trim().toLowerCase());
 
                   return Align(
                     alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.only(bottom: 12),
                       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -125,9 +130,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           if (!isMe) ...[
                             CircleAvatar(
-                              radius: 14,
-                              backgroundColor: GoddyTheme.neonCyan.withValues(alpha: 0.2),
-                              child: Text(msg.senderAvatar, style: const TextStyle(fontSize: 14)),
+                              radius: 16,
+                              backgroundColor: const Color(0xFF1E293B),
+                              child: Text(msg.senderAvatar, style: const TextStyle(fontSize: 16)),
                             ),
                             const SizedBox(width: 8),
                           ],
@@ -135,34 +140,44 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
-                                color: isMe ? GoddyTheme.neonCyan.withValues(alpha: 0.25) : GoddyTheme.bgCard,
-                                borderRadius: BorderRadius.circular(14),
+                                color: isMe ? const Color(0xFF004D40).withValues(alpha: 0.85) : const Color(0xFF1E293B),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: const Radius.circular(16),
+                                  topRight: const Radius.circular(16),
+                                  bottomLeft: Radius.circular(isMe ? 16 : 4),
+                                  bottomRight: Radius.circular(isMe ? 4 : 16),
+                                ),
                                 border: Border.all(
-                                  color: isMe ? GoddyTheme.neonCyan : Colors.white10,
-                                  width: 1,
+                                  color: isMe ? GoddyTheme.neonCyan : Colors.white12,
+                                  width: 1.2,
                                 ),
                               ),
                               child: Column(
                                 crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                 children: [
                                   if (!isMe)
-                                    Text(
-                                      msg.senderName,
-                                      style: const TextStyle(
-                                        color: GoddyTheme.neonCyan,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11,
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 3),
+                                      child: Text(
+                                        msg.senderName,
+                                        style: const TextStyle(
+                                          color: GoddyTheme.neonCyan,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
-                                  const SizedBox(height: 2),
                                   Text(
                                     msg.text,
-                                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                                    style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.3),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     DateFormat('HH:mm').format(msg.timestamp.toLocal()),
-                                    style: const TextStyle(color: GoddyTheme.textMuted, fontSize: 9),
+                                    style: TextStyle(
+                                      color: isMe ? Colors.white60 : GoddyTheme.textMuted,
+                                      fontSize: 9,
+                                    ),
                                   ),
                                 ],
                               ),

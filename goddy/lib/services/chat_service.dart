@@ -62,38 +62,20 @@ class ChatService extends ChangeNotifier {
     _messages.clear();
 
     if (raw.isEmpty) {
-      // Seed default active cyber community chat
-      _messages.addAll([
-        ChatMessage(
-          id: 'init_1',
-          senderId: 'bot_admin',
-          senderName: 'GoddySystem 🤖',
-          senderAvatar: '🛡️',
-          text: 'Chào mừng tất cả game thủ đến với Goddy Gaming Hub! Đua top nhận danh hiệu Huyền Thoại!',
-          timestamp: DateTime.now().subtract(const Duration(minutes: 45)),
-        ),
-        ChatMessage(
-          id: 'init_2',
-          senderId: 'player_viper',
-          senderName: 'ViperCyber',
-          senderAvatar: '⚡',
-          text: 'Ai giải Rubik 3D dưới 25s không? Mình vừa lập kỷ lục 19s nè!',
-          timestamp: DateTime.now().subtract(const Duration(minutes: 20)),
-        ),
-        ChatMessage(
-          id: 'init_3',
-          senderId: 'player_caro',
-          senderName: 'TacticalCaro',
-          senderAvatar: '🥷',
-          text: 'Chế độ Quantum Caro dùng skill Đảo Cờ lật kèo phê thật sự!',
-          timestamp: DateTime.now().subtract(const Duration(minutes: 8)),
-        ),
-      ]);
+      // Khoi dong phong chat trong sach khong co tin nhan he thong ao
       _saveMessages();
     } else {
       for (final item in raw) {
         try {
-          _messages.add(ChatMessage.fromJson(jsonDecode(item)));
+          final msg = ChatMessage.fromJson(jsonDecode(item));
+          // Loc bo tin nhan ao cu neu con sot lai trong local cache
+          if (msg.senderId != 'bot_admin' && 
+              msg.senderId != 'sys' && 
+              msg.senderId != 'player_viper' && 
+              msg.senderId != 'player_caro' &&
+              !msg.senderName.contains('GoddySystem')) {
+            _messages.add(msg);
+          }
         } catch (e) {
           debugPrint('Error decoding chat message: $e');
         }
@@ -117,6 +99,11 @@ class ChatService extends ChangeNotifier {
         for (final item in list) {
           final m = item as Map<String, dynamic>;
           final id = m['id']?.toString() ?? 'msg_${m['timestamp']}';
+          final sId = m['senderId']?.toString() ?? '';
+          final sName = m['senderName']?.toString() ?? '';
+          if (sId == 'sys' || sId == 'bot_admin' || sId == 'viper' || sName.contains('GoddySystem')) {
+            continue; // Bo qua tin nhan he thong ao
+          }
           if (!_messages.any((x) => x.id == id)) {
             final rawTime = m['timestamp']?.toString();
             final parsedTime = rawTime != null
